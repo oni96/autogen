@@ -58,6 +58,7 @@ const ChatBox = ({
   const [workflow, setWorkflow] = React.useState<IWorkflow | null>(null);
 
   const [socketMessages, setSocketMessages] = React.useState<any[]>([]);
+  const [codeBlock, setCodeBlock] = React.useState(false);
 
   const MAX_RETRIES = 10;
   const RETRY_INTERVAL = 2000;
@@ -364,11 +365,19 @@ const ChatBox = ({
   const mainDivRef = React.useRef<HTMLDivElement>(null);
 
   const processAgentResponse = (data: any) => {
+    console.log(socketMessages);
+    
     if (data && data.status) {
       const msg = parseMessage(data.data);
       wsMessages.current.push(msg);
       setMessages(wsMessages.current);
       setLoading(false);
+
+      if (socketMessages.filter((s) => s.code_block).length > 0)
+        {
+          ToastMessage.info("CODE APPROVAL REQUIRED");
+          
+        }
     } else {
       console.log("error", data);
       // setError(data);
@@ -416,6 +425,7 @@ const ChatBox = ({
     wsMessages.current.push(userMessage);
 
     const messagePayload: IMessage = {
+      code_block: codeBlock,
       role: "user",
       content: query,
       user_id: user?.email || "",

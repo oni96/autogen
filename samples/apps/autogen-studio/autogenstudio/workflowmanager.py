@@ -1,8 +1,9 @@
 import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
-
+from pprint import pprint
 import autogen
+import autogen.coding
 
 from .datamodel import (
     Agent,
@@ -10,8 +11,8 @@ from .datamodel import (
     Message,
     SocketMessage,
 )
-from .utils import clear_folder, get_skills_from_prompt, load_code_execution_config, sanitize_model
-
+from .utils import clear_folder, get_skills_from_prompt, load_code_execution_config, sanitize_model, extract_successful_code_blocks
+from loguru import logger
 
 class WorkflowManager:
     """
@@ -96,6 +97,7 @@ class WorkflowManager:
         request_reply: bool = False,
         silent: bool = False,
         sender_type: str = "agent",
+        code_block: bool = False
     ) -> None:
         """
         Processes the message and adds it to the agent history.
@@ -120,6 +122,10 @@ class WorkflowManager:
             "connection_id": self.connection_id,
             "message_type": "agent_message",
         }
+
+        if self.workflow.get("sender")["type"] == "userproxywithapproval":
+            message_payload["code_block"] = code_block
+        
         # if the agent will respond to the message, or the message is sent by a groupchat agent. This avoids adding groupchat broadcast messages to the history (which are sent with request_reply=False), or when agent populated from history
         if request_reply is not False or sender_type == "groupchat":
             self.agent_history.append(message_payload)  # add to history
@@ -237,6 +243,11 @@ class WorkflowManager:
                     **self._serialize_agent(agent),
                     message_processor=self.process_message,
                 )
+            elif agent.type == "userproxywithapproval":
+                agent = ExtendedConversableAgent(
+                    **self._serialize_agent(agent),
+                    message_processor=self.process_message,
+                )
             else:
                 raise ValueError(f"Unknown agent type: {agent.type}")
             return agent
@@ -250,6 +261,10 @@ class WorkflowManager:
             message: The initial message to start the chat.
             clear_history: If set to True, clears the chat history before initiating.
         """
+        # pprint(vars(self.sender))
+        logger.info(f"SENDER:{self.sender}")
+        logger.info(f"RECEIVER:{self.receiver}")
+        logger.info(f"SENDER AGENT TYPE: {self.workflow.get("sender")["type"]}")
         self.sender.initiate_chat(
             self.receiver,
             message=message,
@@ -269,8 +284,18 @@ class ExtendedConversableAgent(autogen.ConversableAgent):
         request_reply: Optional[bool] = None,
         silent: Optional[bool] = False,
     ):
+        logger.info(f'Message: {message}')
+        logger.info(f'Sender {sender}')
+        # logger.info(f'CODE BLOCK {extract_successful_code_blocks()}')
+        codeextractor = autogen.coding.MarkdownCodeExtractor()
+        code_blocks=codeextractor.extract_code_blocks(message)
         if self.message_processor:
-            self.message_processor(sender, self, message, request_reply, silent, sender_type="agent")
+            logger.info(self.message_processor)
+            self.message_processor(sender, self, message, request_reply, silent, sender_type="agent",code_block=len(code_blocks)>0)
+        if len(code_blocks):
+            logger.error("CODE BLOCK FOUND")
+            logger.info(code_blocks)
+            return
         super().receive(message, sender, request_reply, silent)
 
 

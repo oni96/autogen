@@ -308,6 +308,12 @@ export const AgentTypeSelector = ({
       icon: <UserCircleIcon className={iconClass} />,
     },
     {
+      label: "Manual Code Approval Agent",
+      value: "userproxywithapproval",
+      description: <>Typically represents the user and executes code with approval. </>,
+      icon: <UserCircleIcon className={iconClass} />,
+    },
+    {
       label: "Assistant Agent",
       value: "assistant",
       description: <>Plan and generate code to solve user tasks</>,

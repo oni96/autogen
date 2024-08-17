@@ -310,6 +310,17 @@ export const sampleAgentConfig = (agent_type: string = "assistant") => {
     config: userProxyConfig,
   };
 
+  const userProxyWithApprovalFlowSpec: IAgent = {
+    type: "userproxywithapproval",
+    config: {
+      ...userProxyConfig,
+      max_consecutive_auto_reply: 1,
+      name: "user_proxy_with_approval",
+      description: "User Proxy with manual approval for code execution",
+      code_execution_config: "none",
+    },
+  };
+
   const assistantConfig: IAgentConfig = {
     name: "primary_assistant",
     description: "Primary Assistant",
@@ -352,7 +363,9 @@ export const sampleAgentConfig = (agent_type: string = "assistant") => {
     return assistantFlowSpec;
   } else if (agent_type === "groupchat") {
     return groupChatFlowSpec;
-  } else {
+  } else if (agent_type === "userproxywithapproval")
+    return userProxyWithApprovalFlowSpec;
+  else {
     return assistantFlowSpec;
   }
 };

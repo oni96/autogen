@@ -9,6 +9,7 @@ export interface IMessage {
   session_id?: number;
   connection_id?: string;
   workflow_id?: number;
+  code_block: boolean;
 }
 
 export interface IStatus {
@@ -51,7 +52,7 @@ export interface IAgentConfig {
 }
 
 export interface IAgent {
-  type?: "assistant" | "userproxy" | "groupchat";
+  type?: "assistant" | "userproxy" | "groupchat"|"userproxywithapproval";
   config: IAgentConfig;
   created_at?: string;
   updated_at?: string;

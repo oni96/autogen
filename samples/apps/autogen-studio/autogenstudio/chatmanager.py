@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import websockets
 from fastapi import WebSocket, WebSocketDisconnect
+from loguru import logger
 
 from .datamodel import Message, SocketMessage, Workflow
 from .utils import (
@@ -87,6 +88,8 @@ class AutoGenChatManager:
         message_text = message.content.strip()
 
         start_time = time.time()
+        
+        logger.info("MESSAGE_TEST"+message_text)
         workflow_manager.run(message=f"{message_text}", clear_history=False)
         end_time = time.time()
 

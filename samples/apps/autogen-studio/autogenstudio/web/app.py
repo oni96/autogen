@@ -58,6 +58,7 @@ message_handler_thread.start()
 app_file_path = os.path.dirname(os.path.abspath(__file__))
 folders = init_app_folders(app_file_path)
 ui_folder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ui")
+print("UI PATH:"+ui_folder_path)
 
 database_engine_uri = folders["database_engine_uri"]
 dbmanager = DBManager(engine_uri=database_engine_uri)
@@ -110,6 +111,7 @@ api.mount(
 
 def create_entity(model: Any, model_class: Any, filters: dict = None):
     """Create a new entity"""
+    print(model)
     model = check_and_cast_datetime_fields(model)
     try:
         response: Response = dbmanager.upsert(model)
@@ -384,6 +386,7 @@ async def run_session_workflow(message: Message, session_id: int, workflow_id: i
         user_dir = os.path.join(folders["files_static_root"], "user", md5_hash(message.user_id))
         os.makedirs(user_dir, exist_ok=True)
         workflow = workflow_from_id(workflow_id, dbmanager=dbmanager)
+        print(f'managers: {managers["chat"]}')
         agent_response: Message = managers["chat"].chat(
             message=message,
             history=user_message_history,
@@ -415,7 +418,7 @@ async def get_version():
 
 
 async def process_socket_message(data: dict, websocket: WebSocket, client_id: str):
-    print(f"Client says: {data['type']}")
+    print(f"Client says123: {data['type']}")
     if data["type"] == "user_message":
         user_message = Message(**data["data"])
         session_id = data["data"].get("session_id", None)
@@ -426,6 +429,7 @@ async def process_socket_message(data: dict, websocket: WebSocket, client_id: st
             "data": response,
             "connection_id": client_id,
         }
+        logger.info(response_socket_message)
         await websocket_manager.send_message(response_socket_message, websocket)
 
 

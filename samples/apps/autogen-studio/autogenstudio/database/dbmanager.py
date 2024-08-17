@@ -58,6 +58,7 @@ class DBManager:
                     session.add(model)
                 else:
                     session.add(model)
+                print(model_class)
                 session.commit()
                 session.refresh(model)
             except Exception as e:
