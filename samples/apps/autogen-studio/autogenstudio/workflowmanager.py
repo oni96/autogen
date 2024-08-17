@@ -247,6 +247,7 @@ class WorkflowManager:
                 agent = ExtendedConversableAgent(
                     **self._serialize_agent(agent),
                     message_processor=self.process_message,
+                    with_approval=True
                 )
             else:
                 raise ValueError(f"Unknown agent type: {agent.type}")
@@ -264,7 +265,7 @@ class WorkflowManager:
         # pprint(vars(self.sender))
         logger.info(f"SENDER:{self.sender}")
         logger.info(f"RECEIVER:{self.receiver}")
-        logger.info(f"SENDER AGENT TYPE: {self.workflow.get("sender")["type"]}")
+        logger.info(f"SENDER AGENT TYPE: {self.workflow.get('sender')['type']}")
         self.sender.initiate_chat(
             self.receiver,
             message=message,
@@ -273,9 +274,10 @@ class WorkflowManager:
 
 
 class ExtendedConversableAgent(autogen.ConversableAgent):
-    def __init__(self, message_processor=None, *args, **kwargs):
+    def __init__(self, message_processor=None, with_approval=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.message_processor = message_processor
+        self.with_approval = with_approval
 
     def receive(
         self,
@@ -284,15 +286,16 @@ class ExtendedConversableAgent(autogen.ConversableAgent):
         request_reply: Optional[bool] = None,
         silent: Optional[bool] = False,
     ):
-        logger.info(f'Message: {message}')
-        logger.info(f'Sender {sender}')
+        # logger.info(f'Message: {message}')
+        logger.info(f'Sender: {sender}')
+        logger.info(f"With Approval?: {self.with_approval}")
         # logger.info(f'CODE BLOCK {extract_successful_code_blocks()}')
         codeextractor = autogen.coding.MarkdownCodeExtractor()
         code_blocks=codeextractor.extract_code_blocks(message)
         if self.message_processor:
-            logger.info(self.message_processor)
+            # logger.info(pprint(vars(sender)))
             self.message_processor(sender, self, message, request_reply, silent, sender_type="agent",code_block=len(code_blocks)>0)
-        if len(code_blocks):
+        if len(code_blocks) and self.with_approval:
             logger.error("CODE BLOCK FOUND")
             logger.info(code_blocks)
             return
