@@ -158,6 +158,10 @@ iiz__zoom-img {
   margin-left: 0;
 }
 
+.reject-button{
+  background-color: red !important;
+}
+
 @keyframes loader {
   0% {
     width: 0%;

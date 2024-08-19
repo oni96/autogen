@@ -96,6 +96,8 @@ const ChatBox = ({
 
   const parseMessage = (message: any) => {
     let meta;
+    console.log("MESSAGE", message);
+    
     try {
       meta = JSON.parse(message.meta);
     } catch (e) {
@@ -212,9 +214,8 @@ const ChatBox = ({
         {" "}
         <div className={`  ${isUser ? "" : " w-full"} inline-flex gap-2`}>
           <div className=""></div>
-          <div className="font-semibold text-secondary text-sm w-16">{`${
-            isUser ? "USER" : "AGENTS"
-          }`}</div>
+          <div className="font-semibold text-secondary text-sm w-16">{`${isUser ? "USER" : "AGENTS"
+            }`}</div>
           <div
             className={`inline-block group relative w-full p-2 rounded  ${css}`}
           >
@@ -236,6 +237,23 @@ const ChatBox = ({
                   data={message.text}
                   showCode={false}
                 />
+                <p>Do you want to run this code?</p>
+                <Button
+                  type="primary"
+                  className=""
+                  // onClick={() => {
+                  //   runWorkflow(prompt.prompt);
+                  // }}
+                >Approve
+                </Button>
+                <Button
+                  type="default"
+                  className="reject-button"
+                  // onClick={() => {
+                  //   runWorkflow(prompt.prompt);
+                  // }}
+                >Reject
+                </Button>
               </div>
             )}
             {message.meta && (
@@ -329,6 +347,13 @@ const ChatBox = ({
           newsocketMessages.push(data.data);
           setSocketMessages(newsocketMessages);
           socketMsgs.push(data.data);
+          console.log(data.data);
+          
+          if (data.data.recipient === "user_proxy_with_approval" && data.data.code_block) {
+            ToastMessage.info("CODE BLOCK!! Approval Required!")
+            console.log("CODE BLOCK FOUND");
+            
+          }
           setTimeout(() => {
             scrollChatBox(socketDivRef);
             scrollChatBox(messageBoxInputRef);
@@ -365,19 +390,13 @@ const ChatBox = ({
   const mainDivRef = React.useRef<HTMLDivElement>(null);
 
   const processAgentResponse = (data: any) => {
-    console.log(socketMessages);
-    
+
     if (data && data.status) {
       const msg = parseMessage(data.data);
       wsMessages.current.push(msg);
       setMessages(wsMessages.current);
       setLoading(false);
 
-      if (socketMessages.filter((s) => s.code_block).length > 0)
-        {
-          ToastMessage.info("CODE APPROVAL REQUIRED");
-          
-        }
     } else {
       console.log("error", data);
       // setError(data);
@@ -614,9 +633,8 @@ const ChatBox = ({
                 >
                   <CollapseBox
                     open={true}
-                    title={`Agent Messages (${socketMsgs.length} message${
-                      socketMsgs.length > 1 ? "s" : ""
-                    }) `}
+                    title={`Agent Messages (${socketMsgs.length} message${socketMsgs.length > 1 ? "s" : ""
+                      }) `}
                   >
                     {socketMsgs?.map((message: any, i: number) => {
                       return (
@@ -635,9 +653,8 @@ const ChatBox = ({
       {editable && (
         <div className="mt-2 p-2 absolute   bg-primary  bottom-0 w-full">
           <div
-            className={`rounded p-2 shadow-lg flex mb-1  gap-2 ${
-              loading ? " opacity-50 pointer-events-none" : ""
-            }`}
+            className={`rounded p-2 shadow-lg flex mb-1  gap-2 ${loading ? " opacity-50 pointer-events-none" : ""
+              }`}
           >
             {/* <input className="flex-1 p-2 ring-2" /> */}
             <form
@@ -700,9 +717,8 @@ const ChatBox = ({
             </div>
 
             <div
-              className={`mt-2 inline-flex gap-2 flex-wrap  ${
-                loading ? "brightness-75 pointer-events-none" : ""
-              }`}
+              className={`mt-2 inline-flex gap-2 flex-wrap  ${loading ? "brightness-75 pointer-events-none" : ""
+                }`}
             >
               {promptButtons}
             </div>
