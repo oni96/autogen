@@ -187,8 +187,14 @@ class AutoWorkflowManager:
             "connection_id": self.connection_id,
             "message_type": "agent_message",
         }
-        print(vars(self.sender))
-        if self.sender.type == "userproxywithapproval":
+        # Using map and any to check the condition
+        found = any(
+            map(
+                lambda entry: entry['link'].get('agent_type') == 'sender' and entry['agent'].get('type') == 'userproxywithapproval',
+                self.workflow["agents"]
+            )
+        )
+        if found:
             message_payload["code_block"] = code_block
 
         # if the agent will respond to the message, or the message is sent by a groupchat agent. This avoids adding groupchat broadcast messages to the history (which are sent with request_reply=False), or when agent populated from history

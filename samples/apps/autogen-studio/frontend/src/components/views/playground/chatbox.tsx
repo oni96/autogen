@@ -238,7 +238,7 @@ const ChatBox = ({
                 <MarkdownView
                   className="text-sm"
                   data={message.text}
-                  showCode={codeBlock}
+                  showCode={true}
                 />
                 <p>Do you want to run this code?</p>
                 <Button
