@@ -170,6 +170,7 @@ class AgentType(str, Enum):
     assistant = "assistant"
     userproxy = "userproxy"
     groupchat = "groupchat"
+    userproxywithapproval = "userproxywithapproval"
 
 
 class WorkflowAgentType(str, Enum):

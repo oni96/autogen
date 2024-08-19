@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import websockets
 from fastapi import WebSocket, WebSocketDisconnect
+from loguru import logger
 
 from .datamodel import Message
 from .workflowmanager import WorkflowManager
@@ -76,6 +77,7 @@ class AutoGenChatManager:
         )
 
         message_text = message.content.strip()
+        logger.info("MESSAGE_TEST"+message_text)
         result_message: Message = workflow_manager.run(message=f"{message_text}", clear_history=False, history=history)
 
         result_message.user_id = message.user_id

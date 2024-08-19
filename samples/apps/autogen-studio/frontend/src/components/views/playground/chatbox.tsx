@@ -67,6 +67,7 @@ const ChatBox = ({
   const RETRY_INTERVAL = 2000;
 
   const [retries, setRetries] = React.useState(0);
+  const [codeBlock, setCodeBlock] = React.useState(false);
 
   const serverUrl = getServerUrl();
 
@@ -237,8 +238,25 @@ const ChatBox = ({
                 <MarkdownView
                   className="text-sm"
                   data={message.text}
-                  showCode={false}
+                  showCode={codeBlock}
                 />
+                <p>Do you want to run this code?</p>
+                <Button
+                  type="primary"
+                  className=""
+                  // onClick={() => {
+                  //   runWorkflow(prompt.prompt);
+                  // }}
+                >Approve
+                </Button>
+                <Button
+                  type="default"
+                  className="reject-button"
+                  // onClick={() => {
+                  //   runWorkflow(prompt.prompt);
+                  // }}
+                >Reject
+                </Button>
               </div>
             )}
             {message.meta && !isUser && (
@@ -367,6 +385,12 @@ const ChatBox = ({
           newsocketMessages.push(data.data);
           setSocketMessages(newsocketMessages);
           socketMsgs.push(data.data);
+
+          if (data.data.recipient === "user_proxy_with_approval" && data.data.code_block) {
+            ToastMessage.info("CODE BLOCK!! Approval Required!")
+            console.log("CODE BLOCK FOUND");
+          }
+
           setTimeout(() => {
             scrollChatBox(socketDivRef);
             scrollChatBox(messageBoxInputRef);
@@ -403,11 +427,17 @@ const ChatBox = ({
   const mainDivRef = React.useRef<HTMLDivElement>(null);
 
   const processAgentResponse = (data: any) => {
+    // console.log(socketMessages);
     if (data && data.status) {
       const msg = parseMessage(data.data);
       wsMessages.current.push(msg);
       setMessages(wsMessages.current);
       setLoading(false);
+
+      // if (socketMessages.filter((s) => s.code_block).length > 0)
+      // {
+      //   ToastMessage.info("CODE APPROVAL REQUIRED");
+      // }
     } else {
       console.log("error", data);
       // setError(data);
@@ -460,6 +490,7 @@ const ChatBox = ({
       session_id: session?.id,
       workflow_id: session?.workflow_id,
       connection_id: connectionId,
+      code_block: codeBlock
     };
 
     const runWorkflowUrl = `${serverUrl}/sessions/${session?.id}/workflow/${session?.workflow_id}/run`;

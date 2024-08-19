@@ -11,6 +11,7 @@ export interface IMessage {
   workflow_id?: number;
   meta?: any;
   id?: number;
+  code_block: boolean;
 }
 
 export interface IStatus {
@@ -53,7 +54,7 @@ export interface IAgentConfig {
 }
 
 export interface IAgent {
-  type?: "assistant" | "userproxy" | "groupchat";
+  type?: "assistant" | "userproxy" | "groupchat" | "userproxywithapproval";
   config: IAgentConfig;
   created_at?: string;
   updated_at?: string;

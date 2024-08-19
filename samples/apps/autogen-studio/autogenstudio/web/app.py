@@ -119,6 +119,7 @@ api.mount(
 
 def create_entity(model: Any, model_class: Any, filters: dict = None):
     """Create a new entity"""
+    print(model)
     model = check_and_cast_datetime_fields(model)
     try:
         response: Response = dbmanager.upsert(model)

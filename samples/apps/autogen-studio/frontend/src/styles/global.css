@@ -349,6 +349,10 @@ iiz__zoom-img {
   @apply rounded !important;
 }
 
+.reject-button{
+  background-color: red !important;
+}
+
 /* div.chatbox > ul {
   list-style: disc !important;
 }
